@@ -16,7 +16,7 @@ def read_vtk(file_name) -> tuple[np.ndarray, np.ndarray]:
         elem_vert_count = int(file.readline().split()[1])
         for i, line in enumerate(file):
             if i == 0:
-                elem_vert = np.zeros((elem_vert_count, int(line.split()[0])))
+                elem_vert = np.zeros((elem_vert_count, int(line.split()[0])), dtype=np.int)
             elif i == elem_vert_count:
                 break
             elem_vert[i] = list(map(float, line.split()[1:]))
