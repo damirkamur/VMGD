@@ -4,7 +4,7 @@ from math import sin
 from grid import *
 
 # ===== -d( K(x, y) * du(x, y)/dx )/dx - d( K(x, y) * du(x, y)/dy )/dy + u(x, y) = F(x, y)
-S, H = 9, 0.2
+S, H = 10, 0.2
 
 
 def uexact(point_2d) -> float:
@@ -55,15 +55,15 @@ def exact_approximate() -> (np.ndarray, np.ndarray):
     for i in range(Nelem):
         point = grid.elem_center[i]
         fvec[i] = ffun(point)
-        kvec[i] = ffun(point)
+        kvec[i] = kfun(point)
     return fvec, kvec
 
 
 # 0. ============================== Считывание сетки
 # grid = gu_build_from_gmsh_vtk('grid.vtk')
-grid = gu_build_from_tuples(((0.0, 0.0), (1.0, 0.0), (2.0, 0.0), (0.0, 1.0), (1.0, 1.0), (2.0, 1.0)),
-                            ((0, 1, 4, 3), (1, 2, 5, 4)))
-
+# grid = gu_build_from_tuples(((0.0, 0.0), (0.5, 0.0), (1.0, 0.0), (0.0, 1.0), (0.5, 1.0), (1.0, 1.0)),
+#                             ((0, 1, 4, 3), (1, 2, 5, 4)))
+grid = gu_reggrid(0, 0, 1, 1, 100, 3)
 # 1. ============================== Входные данные и аппроксимация аналитических функций
 Nelem = grid.Nelem
 Nvert = grid.Nvert
@@ -99,8 +99,8 @@ for iface in grid.internal_faces:
 
     M[irow1][irow1] += m
     M[irow2][irow2] += m
-    M[irow1][irow2] += -m
-    M[irow2][irow1] += -m
+    M[irow1][irow2] -= m
+    M[irow2][irow1] -= m
 
 # stiffness (Условия Дирихле)
 for iface in grid.boundary_faces:
@@ -116,13 +116,10 @@ for iface in grid.boundary_faces:
     rhs[ielem] += uexact(pnt) * m
 
 u = np.linalg.solve(M, rhs)
-print(M)
-print(rhs)
-print(u)
 # 3. ============================== Визуализация и вывод
-Nvis = 100
+Nvis = 1000
 x = np.linspace(0, 1, Nvis)
-y = 0.05
+y = 0
 
 y_exact, y_numer = np.zeros(Nvis), np.zeros(Nvis)
 for i in range(Nvis):
@@ -131,6 +128,7 @@ for i in range(Nvis):
 
 # графики y_exact(x), y_numer(x)
 plt.plot(x, y_exact, x, y_numer)
+# plt.plot(x, y_numer)
 plt.legend(("EXACT", "NUMER"))
 plt.grid(which='major', linewidth=1)
 plt.grid(which='minor', linestyle=':')
