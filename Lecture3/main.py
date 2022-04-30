@@ -60,11 +60,11 @@ def exact_approximate() -> (np.ndarray, np.ndarray):
 
 
 # 0. ============================== Считывание сетки
-# grid = gu_build_from_gmsh_vtk('grid.vtk')
+grid = gu_build_from_gmsh_vtk('grid.vtk')
 # grid = gu_build_from_tuples(((0.0, 0.0), (0.5, 0.0), (1.0, 0.0), (0.0, 1.0), (0.5, 1.0), (1.0, 1.0)),
 #                             ((0, 1, 4, 3), (1, 2, 5, 4)))
 # grid = gu_reggrid(0, 0, 1, 1, 100, 3)
-grid = gu_build_from_tuples(((0,0),(1,0),(2,0),(1,1),(2,1)),((0,1,3),(1,2,4,3)))
+# grid = gu_build_from_tuples(((0, 0), (1, 0), (2, 0), (1, 1), (2, 1)), ((0, 1, 3), (1, 2, 4, 3)))
 # 1. ============================== Входные данные и аппроксимация аналитических функций
 Nelem = grid.Nelem
 Nvert = grid.Nvert
@@ -104,18 +104,27 @@ for iface in grid.internal_faces:
     M[irow2][irow2] += m
     M[irow2][irow1] -= m
 
-# stiffness (Условия Дирихле)
+# ГУ первого рода
 for iface in grid.boundary_faces:
     x1 = grid.face_center[iface][0]
     iloc = 0 if grid.face_elem[iface][0] > -1 else 1
     ielem = grid.face_elem[iface][iloc]
-
-    h = grid.face_cross_distance[iface]
-    kc = kvec[ielem]
-    m = kc / h * grid.face_area[iface] * grid.face_cosn[iface]
-    M[ielem][ielem] += m
+    M[ielem][ielem] += 1
     pnt = grid.face_center[iface]
-    rhs[ielem] += uexact(pnt) * m
+    rhs[ielem] += uexact(pnt)
+
+# # stiffness (Условия Дирихле)
+# for iface in grid.boundary_faces:
+#     x1 = grid.face_center[iface][0]
+#     iloc = 0 if grid.face_elem[iface][0] > -1 else 1
+#     ielem = grid.face_elem[iface][iloc]
+#
+#     h = grid.face_cross_distance[iface]
+#     kc = kvec[ielem]
+#     m = kc / h * grid.face_area[iface] * grid.face_cosn[iface]
+#     M[ielem][ielem] += m
+#     pnt = grid.face_center[iface]
+#     rhs[ielem] += uexact(pnt) * m
 
 u = np.linalg.solve(M, rhs)
 # 3. ============================== Визуализация и вывод
