@@ -9,7 +9,7 @@ import math
 
 
 class Grid:
-    def __init__(self, vert: np.ndarray, elem_vert: np.ndarray):
+    def __init__(self, vert: np.ndarray, elem_vert: list):
         self.Nelem = len(elem_vert)
         self.Nvert = len(vert)
         self.vert = vert
@@ -37,7 +37,6 @@ def gu_build_from_gmsh_vtk(filename: str) -> Grid:
 
 def gu_build_from_tuples(vert, elem_vert) -> Grid:
     vert = np.array(vert)
-    elem_vert = np.array(elem_vert, dtype=np.int)
     return Grid(vert, elem_vert)
 
 
@@ -45,9 +44,8 @@ def gu_reggrid(x0, y0, x1, y1, nx, ny):
     x = np.linspace(x0, x1, nx)
     y = np.linspace(y0, y1, ny)
     vert = np.array([[x[j], y[i]] for i in range(ny) for j in range(nx)])
-    elem_vert = np.array(
-        [[j + i * nx, (j + 1) + i * nx, (j + 1) + (i + 1) * nx, j + (i + 1) * nx] for i in range(ny - 1) for j in
-         range(nx - 1)], dtype=np.int)
+    elem_vert = [[j + i * nx, (j + 1) + i * nx, (j + 1) + (i + 1) * nx, j + (i + 1) * nx] for i in range(ny - 1)
+                 for j in range(nx - 1)]
     return Grid(vert, elem_vert)
 
 

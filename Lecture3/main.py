@@ -63,7 +63,8 @@ def exact_approximate() -> (np.ndarray, np.ndarray):
 # grid = gu_build_from_gmsh_vtk('grid.vtk')
 # grid = gu_build_from_tuples(((0.0, 0.0), (0.5, 0.0), (1.0, 0.0), (0.0, 1.0), (0.5, 1.0), (1.0, 1.0)),
 #                             ((0, 1, 4, 3), (1, 2, 5, 4)))
-grid = gu_reggrid(0, 0, 1, 1, 100, 3)
+# grid = gu_reggrid(0, 0, 1, 1, 100, 3)
+grid = gu_build_from_tuples(((0,0),(1,0),(2,0),(1,1),(2,1)),((0,1,3),(1,2,4,3)))
 # 1. ============================== Входные данные и аппроксимация аналитических функций
 Nelem = grid.Nelem
 Nvert = grid.Nvert
@@ -98,8 +99,9 @@ for iface in grid.internal_faces:
     m = kc / h * grid.face_area[iface] * grid.face_cosn[iface]
 
     M[irow1][irow1] += m
-    M[irow2][irow2] += m
     M[irow1][irow2] -= m
+
+    M[irow2][irow2] += m
     M[irow2][irow1] -= m
 
 # stiffness (Условия Дирихле)
