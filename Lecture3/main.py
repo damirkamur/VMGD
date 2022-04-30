@@ -1,7 +1,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-from math import sin
+from math import sin, sqrt
 from grid import *
 
 # ===== -d( K(x, y) * du(x, y)/dx )/dx - d( K(x, y) * du(x, y)/dy )/dy + u(x, y) = F(x, y)
@@ -64,10 +64,12 @@ def exact_approximate() -> (np.ndarray, np.ndarray):
 
 
 # 0. ============================== Считывание сетки
-# grid = gu_build_from_gmsh_vtk('grid.vtk')
+grid = gu_build_from_gmsh_vtk('grid_rectangle.vtk')
 # grid = gu_build_from_tuples(((0.0, 0.0), (0.5, 0.0), (1.0, 0.0), (0.0, 1.0), (0.5, 1.0), (1.0, 1.0)),
 #                             ((0, 1, 4, 3), (1, 2, 5, 4)))
-grid = gu_reggrid(0, 0, 1, 0.1, 100, 10)
+# Nelemx = 150
+# Nelemy = 30
+# grid = gu_reggrid(0, 0, 1, 0.1, Nelemx, Nelemy)
 # grid = gu_build_from_tuples(((0, 0), (1, 0), (2, 0), (1, 1), (2, 1)), ((0, 1, 3), (1, 2, 4, 3)))
 # 1. ============================== Входные данные и аппроксимация аналитических функций
 Nelem = grid.Nelem
@@ -135,7 +137,7 @@ print('матрица решена → графики')
 # 3. ============================== Визуализация и вывод
 Nvis = 1000
 x = np.linspace(0, 1, Nvis)
-y = 0.1
+y = 0.0
 
 y_exact, y_numer = np.zeros(Nvis), np.zeros(Nvis)
 for i in range(Nvis):
@@ -150,12 +152,18 @@ plt.grid(which='minor', linestyle=':')
 plt.minorticks_on()
 plt.xlabel('x')
 plt.ylabel('u')
+plt.legend(('Точное решение', 'Численное решение'))
+name_p_file = f'Сравнение решений (grid_rectangle.vtk).png'
 plt.show()
+plt.savefig(name_p_file, dpi=300)
 
 # невязка (максимальная и стандартное отклонение)
 Nmax = np.max(np.abs(y_exact - y_numer))
 N2 = np.std(y_exact - y_numer)
-
+# N2A = sqrt(1 / sum(grid.elem_volume) * sum((grid.elem_volume[i] * (unumer([x[i], y]) - uexact([x[i], y])) ** 2 for i in range(Nvis))))
+print(Nmax)
+print(N2)
+# print(N2A)
 # x0, x1, y0, y1 = 0, 1, 0, 1
 # Nvis = 100
 # X, Y = np.meshgrid(np.linspace(x0, x1, Nvis), np.linspace(y0, y1, Nvis))
