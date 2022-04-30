@@ -1,5 +1,6 @@
 import numpy as np
 from matplotlib import pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 from math import sin
 from grid import *
 
@@ -14,7 +15,8 @@ def uexact(point_2d) -> float:
     :return: значение функции
     """
     x = point_2d[0]
-    return sin(S * (x + H) ** 2)
+    y = point_2d[1]
+    return sin(S * (x + y + H) ** 2)
 
 
 def kfun(point_2d) -> float:
@@ -24,7 +26,8 @@ def kfun(point_2d) -> float:
     :return: значение функции
     """
     x = point_2d[0]
-    return 1 / (8 * S ** 2 * (x + H))
+    y = point_2d[1]
+    return 1 / (8 * S ** 2 * (x + y + H))
 
 
 def ffun(point_2d) -> float:
@@ -34,7 +37,8 @@ def ffun(point_2d) -> float:
     :return: значение функции
     """
     x = point_2d[0]
-    return (x + H + 1) * uexact(point_2d)
+    y = point_2d[1]
+    return (x + y + H + 1) * uexact(point_2d)
 
 
 def unumer(point_2d) -> float:
@@ -60,10 +64,10 @@ def exact_approximate() -> (np.ndarray, np.ndarray):
 
 
 # 0. ============================== Считывание сетки
-# grid = gu_build_from_gmsh_vtk('grid3.vtk')
+# grid = gu_build_from_gmsh_vtk('grid.vtk')
 # grid = gu_build_from_tuples(((0.0, 0.0), (0.5, 0.0), (1.0, 0.0), (0.0, 1.0), (0.5, 1.0), (1.0, 1.0)),
 #                             ((0, 1, 4, 3), (1, 2, 5, 4)))
-grid = gu_reggrid(0, 0, 1, 1, 40, 40)
+grid = gu_reggrid(0, 0, 1, 0.1, 100, 10)
 # grid = gu_build_from_tuples(((0, 0), (1, 0), (2, 0), (1, 1), (2, 1)), ((0, 1, 3), (1, 2, 4, 3)))
 # 1. ============================== Входные данные и аппроксимация аналитических функций
 Nelem = grid.Nelem
@@ -125,12 +129,13 @@ for iface in grid.boundary_faces:
 #     M[ielem][ielem] += m
 #     pnt = grid.face_center[iface]
 #     rhs[ielem] += uexact(pnt) * m
-
+print('Сборка матрицы завершена → решение')
 u = np.linalg.solve(M, rhs)
+print('матрица решена → графики')
 # 3. ============================== Визуализация и вывод
 Nvis = 1000
 x = np.linspace(0, 1, Nvis)
-y = 0.5
+y = 0.1
 
 y_exact, y_numer = np.zeros(Nvis), np.zeros(Nvis)
 for i in range(Nvis):
@@ -139,7 +144,6 @@ for i in range(Nvis):
 
 # графики y_exact(x), y_numer(x)
 plt.plot(x, y_exact, x, y_numer)
-# plt.plot(x, y_numer)
 plt.legend(("EXACT", "NUMER"))
 plt.grid(which='major', linewidth=1)
 plt.grid(which='minor', linestyle=':')
@@ -151,3 +155,19 @@ plt.show()
 # невязка (максимальная и стандартное отклонение)
 Nmax = np.max(np.abs(y_exact - y_numer))
 N2 = np.std(y_exact - y_numer)
+
+# x0, x1, y0, y1 = 0, 1, 0, 1
+# Nvis = 100
+# X, Y = np.meshgrid(np.linspace(x0, x1, Nvis), np.linspace(y0, y1, Nvis))
+# y_numer = np.zeros((Nvis, Nvis))
+# y_exact = np.zeros((Nvis, Nvis))
+# for i in range(Nvis):
+#     for j in range(Nvis):
+#         y_exact[i][j] = uexact([X[i][j], Y[i][j]])
+#         y_numer[i][j] = unumer([X[i][j], Y[i][j]])
+#
+# fig = plt.figure()
+# axes = fig.add_subplot(projection='3d')
+# axes.plot_surface(X, Y, y_exact)
+# axes.plot_surface(X, Y, y_numer)
+# plt.show()
