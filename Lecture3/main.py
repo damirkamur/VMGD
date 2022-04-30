@@ -60,10 +60,10 @@ def exact_approximate() -> (np.ndarray, np.ndarray):
 
 
 # 0. ============================== Считывание сетки
-grid = gu_build_from_gmsh_vtk('grid.vtk')
+# grid = gu_build_from_gmsh_vtk('grid3.vtk')
 # grid = gu_build_from_tuples(((0.0, 0.0), (0.5, 0.0), (1.0, 0.0), (0.0, 1.0), (0.5, 1.0), (1.0, 1.0)),
 #                             ((0, 1, 4, 3), (1, 2, 5, 4)))
-# grid = gu_reggrid(0, 0, 1, 1, 100, 3)
+grid = gu_reggrid(0, 0, 1, 1, 40, 40)
 # grid = gu_build_from_tuples(((0, 0), (1, 0), (2, 0), (1, 1), (2, 1)), ((0, 1, 3), (1, 2, 4, 3)))
 # 1. ============================== Входные данные и аппроксимация аналитических функций
 Nelem = grid.Nelem
@@ -130,7 +130,7 @@ u = np.linalg.solve(M, rhs)
 # 3. ============================== Визуализация и вывод
 Nvis = 1000
 x = np.linspace(0, 1, Nvis)
-y = 0
+y = 0.5
 
 y_exact, y_numer = np.zeros(Nvis), np.zeros(Nvis)
 for i in range(Nvis):
