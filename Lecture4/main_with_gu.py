@@ -100,6 +100,26 @@ for ielem in range(Nelem):
     f = np.array([fvert[k] for k in vertexes])
     SM = S + M
     Mf = M.dot(f)
+
+    # ГУ
+    if vertexes[0] in grid.boundary_vert:
+        Mf[0] -= SM[0][0] * uexact(grid.vert[vertexes[0]])
+        SM[0] = [1, 0, 0]
+        SM[1][0] = 0
+        SM[2][0] = 0
+
+    if vertexes[1] in grid.boundary_vert:
+        Mf[1] -= SM[1][1] * uexact(grid.vert[vertexes[1]])
+        SM[1] = [0, 1, 0]
+        SM[0][1] = 0
+        SM[2][1] = 0
+
+    if vertexes[2] in grid.boundary_vert:
+        Mf[2] -= SM[2][2] * uexact(grid.vert[vertexes[2]])
+        SM[2] = [0, 0, 1]
+        SM[0][2] = 0
+        SM[1][2] = 0
+
     # 11
     row_ind.append(vertexes[0])
     col_ind.append(vertexes[0])
@@ -144,35 +164,13 @@ u = linalg.spsolve(sA, rhs)
 A = sA.toarray()
 print('матрица решена → графики')
 # 3. ============================== Визуализация и вывод
-# Nvis = 1000
-# x = np.linspace(0, 1, Nvis)
-# y = 0
-
-
-# y_exact, y_numer = np.zeros(Nvis), np.zeros(Nvis)
-# for i in range(Nvis):
-#     y_exact[i] = uexact([x[i], y])
-#     y_numer[i] = unumer([x[i], y])
-#
-# # графики y_exact(x), y_numer(x)
-# plt.plot(x, y_exact, x, y_numer)
-# plt.legend(("EXACT", "NUMER"))
-# plt.grid(which='major', linewidth=1)
-# plt.grid(which='minor', linestyle=':')
-# plt.minorticks_on()
-# plt.xlabel('x')
-# plt.ylabel('u')
-# plt.show()
-
-x = [grid.vert[i][0] for i in range(Nvert)]
-y = [grid.vert[i][1] for i in range(Nvert)]
 
 N = sum([abs(u[i] - uvert[i]) for i in range(Nvert)]) / Nvert
 print(N)
 
 # Сохранение в vtk
 with open(filename, 'r') as file:
-    with open(f'export/{filename[:-4]}_export.vtk', 'w') as file1:
+    with open(f'export/{filename[:-4]}_export_gu.vtk', 'w') as file1:
         lines = file.read()
         file1.writelines(lines)
         file1.write(f'\n')
@@ -183,7 +181,7 @@ with open(filename, 'r') as file:
             file1.write(f'{u[i]}\n')
 
 with open(filename, 'r') as file:
-    with open(f'export/{filename[:-4]}_export_exact.vtk', 'w') as file1:
+    with open(f'export/{filename[:-4]}_export_exact_gu.vtk', 'w') as file1:
         lines = file.read()
         file1.writelines(lines)
         file1.write(f'\n')
