@@ -63,8 +63,8 @@ def exact_approximate() -> (np.ndarray, np.ndarray):
     return fvec, kvec
 
 
-Nr = 8
-Nt = 7
+Nr = 2
+Nt = 2
 N2rec = np.zeros(Nr)
 N2tr = np.zeros(Nt)
 Nelemrec = np.zeros(Nr)
@@ -220,7 +220,7 @@ plt.grid(which='major', linewidth=1)
 plt.grid(which='minor', linestyle=':')
 plt.minorticks_on()
 plt.xlabel('Nelem')
-name_p_file = f'Невязка{Nr}.png'
+name_p_file = f'pictures/Невязка{Nr}.png'
 plt.ylabel('N2')
 # plt.show()
 plt.savefig(name_p_file, dpi=300)
