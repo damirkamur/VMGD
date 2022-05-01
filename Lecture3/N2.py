@@ -63,8 +63,8 @@ def exact_approximate() -> (np.ndarray, np.ndarray):
     return fvec, kvec
 
 
-Nr = 2
-Nt = 2
+Nr = 8
+Nt = 8
 N2rec = np.zeros(Nr)
 N2tr = np.zeros(Nt)
 Nelemrec = np.zeros(Nr)
@@ -214,13 +214,14 @@ for index in range(Nt):
     N2tr[index] = N2
     Nelemtr[index] = Nelem
 
-plt.plot(Nelemrec, N2rec, Nelemtr, N2tr)
+# plt.plot(Nelemrec, N2rec, Nelemtr, N2tr)
+plt.loglog(Nelemrec, N2rec, Nelemtr, N2tr)
 plt.legend(("RECTANGLE", "TRIANGLE"))
 plt.grid(which='major', linewidth=1)
 plt.grid(which='minor', linestyle=':')
 plt.minorticks_on()
 plt.xlabel('Nelem')
-name_p_file = f'pictures/Невязка{Nr}.png'
+name_p_file = f'pictures/Невязка{Nr}_log.png'
 plt.ylabel('N2')
-# plt.show()
-plt.savefig(name_p_file, dpi=300)
+plt.show()
+# plt.savefig(name_p_file, dpi=300)
