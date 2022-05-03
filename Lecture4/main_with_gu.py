@@ -66,7 +66,7 @@ def exact_approximate() -> (np.ndarray, np.ndarray):
 
 
 # 0. ============================== Считывание сетки
-filename = 'gridT3.vtk'
+filename = 'gridT2.vtk'
 grid = gu_build_from_gmsh_vtk(filename)
 # grid = gu_build_from_tuples(((0.0, 0.0), (0.5, 0.0), (1.0, 0.0), (0.0, 1.0), (0.5, 1.0), (1.0, 1.0)),
 #                             ((0, 1, 4, 3), (1, 2, 5, 4)))

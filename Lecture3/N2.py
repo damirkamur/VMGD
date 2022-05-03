@@ -139,7 +139,10 @@ for index in range(Nr):
     # невязка (максимальная и стандартное отклонение)
     N2 = np.std(y_exact - y_numer)
     print(N2)
-    N2rec[index] = N2
+    Sum_Volume = math.fabs(sum(grid.elem_volume[i] for i in range(Nelem)))
+    N2A = (1 / Sum_Volume * sum((uexact(grid.elem_vert[i]) - unumer(grid.elem_vert[i])) ** 2 * grid.elem_volume[i] for i in range(Nelem))) ** 0.5
+    print(N2A)
+    N2rec[index] = N2A
     Nelemrec[index] = Nelem
 
 for index in range(Nt):
@@ -211,17 +214,21 @@ for index in range(Nt):
     # невязка (максимальная и стандартное отклонение)
     N2 = np.std(y_exact - y_numer)
     print(N2)
-    N2tr[index] = N2
+    Sum_Volume = math.fabs(sum(grid.elem_volume[i] for i in range(Nelem)))
+    N2A = (1 / Sum_Volume * sum(
+        (uexact(grid.elem_vert[i]) - unumer(grid.elem_vert[i])) ** 2 * grid.elem_volume[i] for i in range(Nelem))) ** 0.5
+    print(N2A)
+    N2tr[index] = N2A
     Nelemtr[index] = Nelem
 
-# plt.plot(Nelemrec, N2rec, Nelemtr, N2tr)
-plt.loglog(Nelemrec, N2rec, Nelemtr, N2tr)
+plt.plot(Nelemrec, N2rec, Nelemtr, N2tr)
+# plt.loglog(Nelemrec, N2rec, Nelemtr, N2tr)
 plt.legend(("RECTANGLE", "TRIANGLE"))
 plt.grid(which='major', linewidth=1)
 plt.grid(which='minor', linestyle=':')
 plt.minorticks_on()
 plt.xlabel('Nelem')
-name_p_file = f'pictures/Невязка{Nr}_log.png'
-plt.ylabel('N2')
-plt.show()
-# plt.savefig(name_p_file, dpi=300)
+name_p_file = f'pictures/НевязкаN2A.png'
+plt.ylabel('N2A')
+# plt.show()
+plt.savefig(name_p_file, dpi=300)
