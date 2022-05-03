@@ -103,22 +103,30 @@ for ielem in range(Nelem):
 
     # ГУ
     if vertexes[0] in grid.boundary_vert:
-        Mf[0] -= SM[0][0] * uexact(grid.vert[vertexes[0]])
+        Mf[1] -= SM[1][0] * uexact(grid.vert[vertexes[0]])
+        Mf[2] -= SM[2][0] * uexact(grid.vert[vertexes[0]])
+    if vertexes[1] in grid.boundary_vert:
+        Mf[0] -= SM[0][1] * uexact(grid.vert[vertexes[1]])
+        Mf[2] -= SM[2][1] * uexact(grid.vert[vertexes[1]])
+    if vertexes[2] in grid.boundary_vert:
+        Mf[0] -= SM[0][2] * uexact(grid.vert[vertexes[2]])
+        Mf[1] -= SM[1][2] * uexact(grid.vert[vertexes[2]])
+    if vertexes[0] in grid.boundary_vert:
         SM[0] = [1, 0, 0]
+        Mf[0] = uexact(grid.vert[vertexes[0]])
         SM[1][0] = 0
         SM[2][0] = 0
-
     if vertexes[1] in grid.boundary_vert:
-        Mf[1] -= SM[1][1] * uexact(grid.vert[vertexes[1]])
         SM[1] = [0, 1, 0]
+        Mf[1] = uexact(grid.vert[vertexes[1]])
         SM[0][1] = 0
         SM[2][1] = 0
-
     if vertexes[2] in grid.boundary_vert:
-        Mf[2] -= SM[2][2] * uexact(grid.vert[vertexes[2]])
         SM[2] = [0, 0, 1]
+        Mf[2] = uexact(grid.vert[vertexes[2]])
         SM[0][2] = 0
         SM[1][2] = 0
+
 
     # 11
     row_ind.append(vertexes[0])
@@ -161,7 +169,6 @@ for ielem in range(Nelem):
 sA = sparse.csc_matrix((tuple(data), (tuple(row_ind), tuple(col_ind))), shape=(Nvert, Nvert))
 print('Сборка матрицы завершена → решение')
 u = linalg.spsolve(sA, rhs)
-A = sA.toarray()
 print('матрица решена → графики')
 # 3. ============================== Визуализация и вывод
 
