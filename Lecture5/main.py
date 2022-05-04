@@ -13,7 +13,7 @@ Nelem = 30
 Nvert = Nelem + 1
 Nbasis = Nvert
 grid = np.linspace(A, B, Nvert)
-center = np.array([grid[i + 1] - grid[i] for i in range(Nelem)])
+center = np.array([(grid[i + 1] + grid[i]) / 2 for i in range(Nelem)])
 
 elements = list()
 for ielem in range(Nelem):
