@@ -66,20 +66,25 @@ def exact_approximate() -> (np.ndarray, np.ndarray):
 
 
 kol = 3
-Nt = np.zeros(kol)
-Nt_elem = np.zeros(kol)
-for index in range(kol):
+# Nt = np.zeros(kol)
+# Nt_elem = np.zeros(kol)
+Nt = np.array([3, 10, 30, 40, 50, 60, 70, 80, 90, 100, 150, 200, 250, 300, 350, 400, 450, 500])
+Nt_elem = np.zeros(len(Nt))
+NtN2A = np.zeros(len(Nt))
+for index in range(len(Nt)):
     # 0. ============================== Считывание сетки
     filename = f'gridT{index + 1}__.vtk'
-    grid = gu_build_from_gmsh_vtk(filename)
+    # grid = gu_build_from_gmsh_vtk(filename)
     # grid = gu_build_from_tuples(((0.0, 0.0), (0.5, 0.0), (1.0, 0.0), (0.0, 1.0), (0.5, 1.0), (1.0, 1.0)),
     #                             ((0, 1, 4, 3), (1, 2, 5, 4)))
     # grid = gu_reggrid(0, 0, 1, 0.1, 100, 10)
+    grid = gu_reggrid_tr(0, 0, 1, 2 / Nt[index], Nt[index], 2)
     # grid = gu_build_from_tuples(((0, 0), (1, 0), (2, 0), (1, 1), (2, 1)), ((0, 1, 3), (1, 2, 4, 3)))
     # 1. ============================== Входные данные и аппроксимация аналитических функций
     Nelem = grid.Nelem
     Nvert = grid.Nvert
     Nface = grid.Nface
+    ML = np.zeros(Nvert)
     fvec, kvec = exact_approximate()
     fvert = [ffun(grid.vert[i]) for i in range(Nvert)]
     uvert = [uexact(grid.vert[i]) for i in range(Nvert)]
@@ -180,18 +185,29 @@ for index in range(kol):
     Sum_Volume = math.fabs(sum(grid.elem_volume[i] for i in range(Nelem)))
     # ML = M = np.array([1, 1, 1]) * J / 6
 
-    N2 = (1 / Sum_Volume * J / 6 * (sum(uvert[i] - u[i] for i in range(Nvert))) ** 2) ** 0.5
+    for ii in range(Nelem):
+        e = grid.elem_vert[ii]
+        for i in range(len(e)):
+            ML[e[i]] += 1 / 6 * grid.elem_volume[ii]
+
+    U = np.zeros(Nvert)
+    MLU = np.zeros(Nvert)
+    for i in range(Nvert):
+        U[i] = uvert[i] - u[i]
+        MLU[i] = ML[i] * U[i]
+
+    N2 = (1 / Sum_Volume * sum(MLU[i] ** 2 for i in range(Nvert))) ** 0.5
     print(N2)
-    Nt[index] = N2
+    NtN2A[index] = N2
     Nt_elem[index] = Nelem
 
-# plt.plot(Nt_elem, Nt)
-plt.loglog(Nt_elem, Nt)
+# plt.plot(Nt_elem, NtN2A)
+plt.loglog(Nt_elem, NtN2A)
 plt.grid(which='major', linewidth=1)
 plt.grid(which='minor', linestyle=':')
 plt.minorticks_on()
 plt.xlabel('Nelem')
-name_p_file = f'pictures/Невязка{N2}_log.png'
+name_p_file = f'pictures/НевязкаN2A_log.png'
 plt.ylabel('N2')
 # plt.show()
 plt.savefig(name_p_file, dpi=300)

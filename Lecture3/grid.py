@@ -49,6 +49,24 @@ def gu_reggrid(x0, y0, x1, y1, nx, ny):
     return Grid(vert, elem_vert)
 
 
+def gu_reggrid_tr(x0, y0, x1, y1, nx, ny):
+    x = np.linspace(x0, x1, nx)
+    x1 = np.linspace(x0 + (x1 - x0) / (nx-1) / 2, x1 - (x1 - x0) / (nx-1) / 2, nx - 1)
+    y = np.linspace(y0, y1, ny)
+    y1 = np.linspace(y0 + (y1 - y0) / (ny-1) / 2, y1 - (y1 - y0) / (ny-1) / 2, ny - 1)
+    vert1 = list([[x[j], y[i]] for i in range(ny) for j in range(nx)])
+    vert2 = list([[x1[j], y1[i]] for i in range(ny - 1) for j in range(nx - 1)])
+    vert = np.array(vert1+vert2, dtype=np.float32)
+    elem_vert1 = list()
+    elem_vert1 = [[[j + i * nx, (j + 1) + i * nx, j + (ny) * (nx) + i * (nx-1)],
+                   [(j + 1) + i * nx, (j + 1) + (i + 1) * nx, j + (ny) * (nx) + i * (nx-1)],
+                   [(j + 1) + (i + 1) * nx, j + (i + 1) * nx, j + (ny) * (nx) + i * (nx-1)],
+                   [j + (i + 1) * nx, j + i * nx, j + (ny) * (nx) + i * (nx-1)]]
+                  for i in range(ny - 1) for j in range(nx - 1)]
+    elem_vert = [elem_vert1[i][j] for i in range(len(elem_vert1)) for j in range(4)]
+    return Grid(vert, elem_vert)
+
+
 def gu_vert_elem(grid: Grid) -> list[list[int]]:
     vert_elem = dict()
     for i in range(grid.Nelem):
