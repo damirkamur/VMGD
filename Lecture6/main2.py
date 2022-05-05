@@ -48,8 +48,9 @@ def unumer(point_2d) -> float:
 
 
 # 0. ============================== Считывание сетки
-filename = 'gridR2.vtk'
+filename = 'gridTR1.vtk'
 grid = gu_build_from_gmsh_vtk(filename)
+# grid = gu_reggrid_tr(0, 0, 1, 1, 2, 2)
 Nelem = grid.Nelem
 Nvert = grid.Nvert
 Nbasis = Nvert
