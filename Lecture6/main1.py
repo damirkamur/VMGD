@@ -6,7 +6,7 @@ from D1Sqr import *
 
 # 1. ===================================== Input Data
 A, B = 0, 1
-Nelem = 5
+Nelem = 7
 Nvert = Nelem + 1
 Nbasis = Nelem + Nvert
 grid = np.linspace(A, B, Nvert)
@@ -98,4 +98,5 @@ plt.grid(which='minor', linestyle=':')
 plt.minorticks_on()
 plt.xlabel('x')
 plt.ylabel('u')
-plt.show()
+# plt.show()
+plt.savefig(f'pictures/Сравнение решений({Nelem}).png', dpi=300)
