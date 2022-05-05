@@ -1,8 +1,5 @@
 import matplotlib.pyplot as plt
 from math import floor
-
-import numpy as np
-
 from D1Sqr import *
 
 # ===== -d( K(x) * du(x)/dx )/dx + u(x) = F(x) ====

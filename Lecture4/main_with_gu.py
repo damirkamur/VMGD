@@ -66,7 +66,7 @@ def exact_approximate() -> (np.ndarray, np.ndarray):
 
 
 # 0. ============================== Считывание сетки
-filename = 'gridT3.vtk'
+filename = 'gridT2.vtk'
 grid = gu_build_from_gmsh_vtk(filename)
 # grid = gu_build_from_tuples(((0.0, 0.0), (0.5, 0.0), (1.0, 0.0), (0.0, 1.0), (0.5, 1.0), (1.0, 1.0)),
 #                             ((0, 1, 4, 3), (1, 2, 5, 4)))
@@ -167,6 +167,7 @@ for ielem in range(Nelem):
     rhs[vertexes[2]] += Mf[2]
 
 sA = sparse.csc_matrix((tuple(data), (tuple(row_ind), tuple(col_ind))), shape=(Nvert, Nvert))
+A = sA.toarray()
 print('Сборка матрицы завершена → решение')
 u = linalg.spsolve(sA, rhs)
 print('матрица решена → графики')
