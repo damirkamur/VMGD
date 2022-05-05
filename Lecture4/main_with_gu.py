@@ -167,6 +167,7 @@ for ielem in range(Nelem):
     rhs[vertexes[2]] += Mf[2]
 
 sA = sparse.csc_matrix((tuple(data), (tuple(row_ind), tuple(col_ind))), shape=(Nvert, Nvert))
+A = sA.toarray()
 print('Сборка матрицы завершена → решение')
 u = linalg.spsolve(sA, rhs)
 print('матрица решена → графики')

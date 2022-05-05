@@ -1,46 +1,35 @@
-import numpy as np
-from femutils import *
-from D1Lin import *
-from math import exp, floor
-from copy import deepcopy
-from matplotlib import pyplot as plt
+import matplotlib.pyplot as plt
+from math import floor
+from D1Sqr import *
 
-# ===== dU/dt + v * dU/dx = 0
+# ===== -d( K(x) * du(x)/dx )/dx + u(x) = F(x) ====
+
 # 1. ===================================== Input Data
-ndim = 1
 A, B = 0, 1
-Nelem = 30
+Nelem = 5
 Nvert = Nelem + 1
-Nbasis = Nvert
+Nbasis = Nelem + Nvert
 grid = np.linspace(A, B, Nvert)
 center = np.array([(grid[i + 1] + grid[i]) / 2 for i in range(Nelem)])
 
 elements = list()
 for ielem in range(Nelem):
-    conn = [ielem, ielem + 1]
-    vert = [grid[conn[0]], grid[conn[1]]]
-    if ielem == Nelem - 1:
-        conn[1] = 0
-    elements.append(D1Lin(vert, conn))
+    vert = [grid[ielem], grid[ielem + 1]]
+    bas = [ielem, ielem + 1, Nvert + ielem]
+    elements.append(D1Sqr(vert, bas))
+
 
 # 2. ============================= Analytical Functions
-v = [1]
+def uexact(x: float) -> float:
+    return 3 * x ** 5 - x ** 4 - x ** 3 - 3 * x ** 2 + x
 
 
-def uexact0(x: float) -> float:
-    if not -0.5 <= x <= 0.5:
-        x -= x // 1
-    if x > 0.5:
-        x -= 1
-    return exp(-(x * 10) ** 2)
+def kfun(x: float) -> float:
+    return 1
 
 
-def uexact(x: float, t: float) -> float:
-    return uexact0(x - v[0] * t)
-
-
-def ffun(x: float) -> float:
-    return 0
+def ffun(x: float):
+    return -(60 * x ** 3 - 12 * x ** 2 - 6 * x - 6) + uexact(x)
 
 
 def find_elem(x: float) -> int:
@@ -56,44 +45,42 @@ def unumer(x: float) -> float:
     return sum([u[e.ibasis[i]] * e.phi[i](xi) for i in range(e.nbasis)])
 
 
+fvec = list()
+kvec = list()
+for ielem in range(Nelem):
+    kvec.append(kfun(center[ielem]))
+
+for i in range(Nvert):
+    fvec.append(ffun(grid[i]))
+
+for i in range(Nvert, Nbasis):
+    fvec.append(ffun(center[i - Nvert]))
+
 # 3.2 ================================ SLE Assembly and Solution
+# (M + S) u = Mf
 Mass = np.zeros((Nbasis, Nbasis))
-Tran = np.zeros((Nbasis, Nbasis))
+Stiff = np.zeros((Nbasis, Nbasis))
 
 for ielem in range(Nelem):
     e = elements[ielem]
     for i in range(e.nbasis):
         for j in range(e.nbasis):
             Mass[e.ibasis[i]][e.ibasis[j]] += e.mass[i][j]
-            for idim in range(ndim):
-                Tran[e.ibasis[i]][e.ibasis[j]] += v[idim] * e.tran[idim][i][j]
+            Stiff[e.ibasis[i]][e.ibasis[j]] += kvec[ielem] * e.stiff[i][j]
 
-# Tran = fem_algebraic_upwinding(Tran)
+M = Mass + Stiff
+rhs = Mass.dot(fvec)
 
-tend = 1.0
-tau = 0.001
+# ГУ
+M[0][:] = 0
+M[0][0] = 1
+rhs[0] = uexact(grid[0])
 
-# Начальное значение
-u = np.zeros(Nbasis)
-for ivert in range(Nvert):
-    u[ivert] = uexact0(grid[ivert])
-
-M = 1 / tau * Mass + Tran
-
-# Периодические условия
+M[Nvert - 1][:] = 0
 M[Nvert - 1][Nvert - 1] = 1
-M[Nvert - 1][0] = -1
+rhs[Nvert - 1] = uexact(grid[Nvert - 1])
 
-t = 0
-
-while t < tend:
-    t += tau
-    uold = deepcopy(u)
-
-    rhs = 1 / tau * Mass.dot(uold)
-    rhs[Nvert - 1] = 0
-    print(f't = {t}')
-    u = np.linalg.solve(M, rhs)
+u = np.linalg.solve(M, rhs)
 
 # 4. ============================== Visualization and output
 Nvis = 1000
@@ -101,7 +88,7 @@ x = np.linspace(A, B, Nvis)
 y_exact = np.zeros(Nvis)
 y_numer = np.zeros(Nvis)
 for i in range(Nvis):
-    y_exact[i] = uexact(x[i], t)
+    y_exact[i] = uexact(x[i])
     y_numer[i] = unumer(x[i])
 
 plt.plot(x, y_exact, x, y_numer)
