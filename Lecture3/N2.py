@@ -53,33 +53,36 @@ def unumer(point_2d) -> float:
 
 
 # аппроксимация аналитических функций
-def exact_approximate() -> (np.ndarray, np.ndarray):
+def exact_approximate() -> (np.ndarray, np.ndarray, np.ndarray):
     fvec = np.zeros(Nelem)
     kvec = np.zeros(Nelem)
+    uvec = np.zeros(Nelem)
     for i in range(Nelem):
         point = grid.elem_center[i]
         fvec[i] = ffun(point)
         kvec[i] = kfun(point)
-    return fvec, kvec
+        uvec[i] = uexact(point)
+    return fvec, kvec, uvec
 
 
-Nr = 8
-Nt = 8
-N2rec = np.zeros(Nr)
-N2tr = np.zeros(Nt)
-Nelemrec = np.zeros(Nr)
-Nelemtr = np.zeros(Nt)
+Nr = np.array([10, 30, 50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000])
+Nt = np.array([3, 10, 30, 40, 50, 60, 70, 80, 90, 100, 150, 200, 250])
+N2rec = np.zeros(len(Nr))
+N2tr = np.zeros(len(Nt))
+Nelemrec = np.zeros(len(Nr))
+Nelemtr = np.zeros(len(Nt))
 
-for index in range(Nr):
+for index in range(len(Nr)):
     print(f'{index} rec')
     # 0. ============================== Считывание сетки
-    grid = gu_build_from_gmsh_vtk(f'grid_rec{index + 1}.vtk')
+    # grid = gu_build_from_gmsh_vtk(f'grid_rec{index + 1}.vtk')
+    grid = gu_reggrid(0, 0, 1, 2 / Nr[index], Nr[index], 2)
 
     # 1. ============================== Входные данные и аппроксимация аналитических функций
     Nelem = grid.Nelem
     Nvert = grid.Nvert
     Nface = grid.Nface
-    fvec, kvec = exact_approximate()
+    fvec, kvec, uvec = exact_approximate()
 
     # 2. ============================== Сборка матрицы и решение
     M = np.zeros((Nelem, Nelem))
@@ -139,19 +142,23 @@ for index in range(Nr):
     # невязка (максимальная и стандартное отклонение)
     N2 = np.std(y_exact - y_numer)
     print(N2)
-    N2rec[index] = N2
+    Sum_Volume = math.fabs(sum(grid.elem_volume[i] for i in range(Nelem)))
+    N2A = (1 / Sum_Volume * sum((uvec[i] - u[i]) ** 2 * grid.elem_volume[i] for i in range(Nelem))) ** 0.5
+    print(N2A)
+    N2rec[index] = N2A
     Nelemrec[index] = Nelem
 
-for index in range(Nt):
+for index in range(len(Nt)):
     print(f'{index} tr')
     # 0. ============================== Считывание сетки
-    grid = gu_build_from_gmsh_vtk(f'grid_tr{index + 1}.vtk')
+    # grid = gu_build_from_gmsh_vtk(f'grid_tr{index + 1}.vtk')
+    grid = gu_reggrid_tr(0, 0, 1, 2 / Nt[index], Nt[index], 2)
 
     # 1. ============================== Входные данные и аппроксимация аналитических функций
     Nelem = grid.Nelem
     Nvert = grid.Nvert
     Nface = grid.Nface
-    fvec, kvec = exact_approximate()
+    fvec, kvec, uvec = exact_approximate()
 
     # 2. ============================== Сборка матрицы и решение
     M = np.zeros((Nelem, Nelem))
@@ -211,17 +218,21 @@ for index in range(Nt):
     # невязка (максимальная и стандартное отклонение)
     N2 = np.std(y_exact - y_numer)
     print(N2)
-    N2tr[index] = N2
+    Sum_Volume = math.fabs(sum(grid.elem_volume[i] for i in range(Nelem)))
+    N2A = (1 / Sum_Volume * sum(
+        (uvec[i] - u[i]) ** 2 * grid.elem_volume[i] for i in range(Nelem))) ** 0.5
+    print(N2A)
+    N2tr[index] = N2A
     Nelemtr[index] = Nelem
 
-# plt.plot(Nelemrec, N2rec, Nelemtr, N2tr)
-plt.loglog(Nelemrec, N2rec, Nelemtr, N2tr)
+plt.plot(Nelemrec, N2rec, Nelemtr, N2tr)
+# plt.loglog(Nelemrec, N2rec, Nelemtr, N2tr)
 plt.legend(("RECTANGLE", "TRIANGLE"))
 plt.grid(which='major', linewidth=1)
 plt.grid(which='minor', linestyle=':')
 plt.minorticks_on()
 plt.xlabel('Nelem')
-name_p_file = f'pictures/Невязка{Nr}_log.png'
-plt.ylabel('N2')
-plt.show()
-# plt.savefig(name_p_file, dpi=300)
+name_p_file = f'pictures/НевязкаN2A_not_log.png'
+plt.ylabel('N2A')
+# plt.show()
+plt.savefig(name_p_file, dpi=300)

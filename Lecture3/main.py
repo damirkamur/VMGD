@@ -69,7 +69,7 @@ def exact_approximate() -> (np.ndarray, np.ndarray):
 #                             ((0, 1, 4, 3), (1, 2, 5, 4)))
 Nelemx = 150
 Nelemy = 30
-grid = gu_reggrid(0, 0, 1, 0.1, Nelemx, Nelemy)
+grid = gu_reggrid_tr(0, 0, 1, 1/50, 100, 2)
 # grid = gu_build_from_tuples(((0, 0), (1, 0), (2, 0), (1, 1), (2, 1)), ((0, 1, 3), (1, 2, 4, 3)))
 # 1. ============================== Входные данные и аппроксимация аналитических функций
 Nelem = grid.Nelem
@@ -137,7 +137,7 @@ print('матрица решена → графики')
 # 3. ============================== Визуализация и вывод
 Nvis = 1000
 x = np.linspace(0, 1, Nvis)
-y = 0.1
+y = 0.0
 
 y_exact, y_numer = np.zeros(Nvis), np.zeros(Nvis)
 for i in range(Nvis):
@@ -154,8 +154,8 @@ plt.xlabel('x')
 plt.ylabel('u')
 plt.legend(('Точное решение', 'Численное решение'))
 name_p_file = f'pictures/Сравнение решений. Разбиение по x({Nelemx}), разбиение по y({Nelemy}, y={y}).png'
-# plt.show()
-plt.savefig(name_p_file, dpi=300)
+plt.show()
+# plt.savefig(name_p_file, dpi=300)
 
 # невязка (максимальная и стандартное отклонение)
 Nmax = np.max(np.abs(y_exact - y_numer))
